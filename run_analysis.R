@@ -7,35 +7,58 @@
 ## 5. From the data set in step 4, creates a second, independent tidy data set with the average of 
 ##    each variable for each activity and each subject.
 
-# Read test and train data sets
-TrainData <- read.table("test/X_test.txt")
-TrainLabels <- read.table("test/y_test.txt")
-TestData <- read.table("train/X_train.txt")
-TestLabels <- read.table("train/y_train.txt")
-ActivityLables <- read.table("activity_labels.txt")
-FeatureNames <- read.table("features.txt")
-FeatureNamesVector <- as.character(FeatureNames)
-TrainSubjectNames <- read.table("train/subject_train.txt")
-TestSubjectNames <- read.table("test/subject_test.txt")
+# Read train data
+TrainData <- read.table("train/X_train.txt")
+TrainSubjects <- read.table("train/subject_train.txt")
+
+#Read test data
+TestData <- read.table("test/X_test.txt")
+TestSubjects <- read.table("test/subject_test.txt")
 
 # Merge test and train sets
-StackedData <- rbind(TestData, TrainData)
-StackedLabels <- rbind(TestLabels, TrainLabels)
-StackedLabels <- merge(StackedLabels, ActivityLables)
-StackedNames <- rbind(TestSubjectNames, TrainSubjectNames)
+StackedData <- rbind(TrainData, TestData)
+StackedSubjects <- rbind(TrainSubjects, TestSubjects)
+colnames(StackedSubjects) <- "subjects"
+
+#Get Variable names
+Variables <- read.table("features.txt")
+Variables <- Variables[2]
+names(Variables) <- "Features"
 
 # Extract Relevant Data
-Indexes <- grep("mean|std", FeatureNames[,2])
-StackedFiltered <- StackedData[,Indexes]
+Indexes <- grep("mean|std", Variables$Features)
+StackedData <- StackedData[,Indexes]
 
 # Appropiately label the data set with descriptive variable names
-names(StackedFiltered) <- FeatureNames[Indexes,2]
-StackedFiltered <- cbind(StackedFiltered, "Activity" = StackedLabels[,2], "Subject" = StackedNames[,1])
+names(StackedData) <- Variables[Indexes,1]
+
+# Bind Data and Subjects
+StackedData <- cbind(StackedData, StackedSubjects)
+
+#Get Activity Numbers
+TrainActivity <- read.table("train/y_train.txt")
+TestActivity <- read.table("test/y_test.txt")
+StackedActivity <- rbind(TrainActivity, TestActivity)
+names(StackedActivity) <- "activity"
+
+#Get Activity Labels
+ActivityLabels <- read.table("activity_labels.txt")
+ActivityLabels <- ActivityLabels[2]
+names(ActivityLabels) <- "labels"
+
+#Merge Activity numbers with Activity labels
+StackedActivity$activity = sapply(StackedActivity$activity, 
+                                  function(x) {ActivityLabels$labels[x]}
+                                  )
+
+# Combine columns
+StackedData <- cbind(StackedData, StackedActivity)
 
 # creates a second, independent tidy data set with the average of each variable 
 # for each activity and each subject.
-GroupedSF <- group_by(StackedFiltered, Activity, Subject)
-GroupedSFAvg <- summarise_all(GroupedSF, mean)
+df = StackedData %>%
+  group_by(activity, subjects) %>%
+  summarise_all(mean)
 
 # write output to wd
-write.table(GroupedSFAvg, file = "tidydataset.txt", row.names = FALSE)
+write.table(df, file = "tidydataset.txt", row.names = FALSE)
