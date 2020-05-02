@@ -2,6 +2,7 @@
 Assignment submission for Coursera: Getting and Cleaning Data
 
 =========================================================================================
+
 This script cleans data from the Human Activity Recognition Using Smartphones Dataset (Version 1.0) and 
 returns a tidy data set containing averages of all variables grouped by activity and subject.
 
@@ -14,7 +15,9 @@ Input data files:
 - 'test/y_test.txt': Test labels.
 - 'train/subject_train.txt': Each row identifies the subject who performed the activity for each window 
 sample. Its range is from 1 to 30 (same description for test set).
+
 =========================================================================================
+
 Cleaning Steps:
 1. Read all relevant test and train data sets
 2. Merges test and train sets into one set
