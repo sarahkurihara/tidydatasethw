@@ -37,3 +37,5 @@ StackedFiltered <- cbind(StackedFiltered, "Activity" = StackedLabels[,2], "Subje
 GroupedSF <- group_by(StackedFiltered, Activity, Subject)
 GroupedSFAvg <- summarise_all(GroupedSF, mean)
 
+# write output to wd
+write.table(GroupedSFAvg, file = "tidydataset.txt", row.names = FALSE)
